@@ -2,6 +2,7 @@ package com.jcg.security.Controllers;
 
 import com.jcg.security.Models.User;
 import com.jcg.security.Repositories.UserRepository;
+import com.jcg.security.Services.EncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,8 @@ import java.util.List;
 public class UsersControllers {
     @Autowired
     UserRepository theUserRepository;
+    @Autowired
+    EncryptionService theEncryptionService;
 
     @GetMapping("")
     public List<User> find(){
@@ -26,6 +29,7 @@ public class UsersControllers {
 
     @PostMapping
     public User create(@RequestBody User newUser){
+        newUser.setPassword(this.theEncryptionService.convertSHA256(newUser.getPassword()));
         return this.theUserRepository.save(newUser);
     }
 
@@ -35,7 +39,7 @@ public class UsersControllers {
         if (actualUser != null){
             actualUser.setName(newUser.getName());
             actualUser.setEmail(newUser.getEmail());
-            actualUser.setPassword(newUser.getPassword());
+            actualUser.setPassword(this.theEncryptionService.convertSHA256(newUser.getPassword()));
             this.theUserRepository.save(actualUser);
             return actualUser;
         }else{
