@@ -23,16 +23,18 @@ public class JwtService {
 
     @Value("${jwt.expiration}")
     private Long expiration; // Tiempo de expiración del token en milisegundos.
-    private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
-    public HashMap<String, Object> generateToken(User theUser, List<Role> theRoles) {
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    public HashMap<String, Object> generateToken(User theUser) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
         Map<String, Object> claims = new HashMap<>();
         claims.put("_id", theUser.get_id());
         claims.put("name", theUser.getName());
         claims.put("email", theUser.getEmail());
-        claims.put("roles", theRoles);
 
         HashMap<String, Object> theResponse = new HashMap<>();
 
@@ -40,7 +42,7 @@ public class JwtService {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(secretKey)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
 
         theResponse.put("token", token);
@@ -51,17 +53,13 @@ public class JwtService {
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claimsJws = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
+                    .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);
 
             // Verifica la expiración del token
             Date now = new Date();
-            if (claimsJws.getBody().getExpiration().before(now)) {
-                return false;
-            }
-
-            return true;
+            return !claimsJws.getBody().getExpiration().before(now);
         } catch (SignatureException ex) {
             // La firma del token es inválida
             return false;
@@ -74,19 +72,23 @@ public class JwtService {
     public User getUserFromToken(String token) {
         try {
             Jws<Claims> claimsJws = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
+                    .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);
 
             Claims claims = claimsJws.getBody();
 
+            System.out.println("Claims: " + claims);
+
             User user = new User();
             user.set_id((String) claims.get("_id"));
             user.setName((String) claims.get("name"));
             user.setEmail((String) claims.get("email"));
+
             return user;
         } catch (Exception e) {
-            // En caso de que el token sea inválido o haya expirado
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("SecretKey: " + getSigningKey());
             return null;
         }
     }

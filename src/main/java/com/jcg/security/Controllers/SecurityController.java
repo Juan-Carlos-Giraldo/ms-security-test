@@ -66,7 +66,7 @@ public class SecurityController {
                     .map(UserRole::getRole)
                     .collect(Collectors.toList());
 
-            tokenResponse = theJwtService.generateToken(theActualUser, theRoles);
+            tokenResponse = theJwtService.generateToken(theActualUser);
             String token = tokenResponse.get("token").toString();
             Date expirationDate = (Date) tokenResponse.get("expiration");
 

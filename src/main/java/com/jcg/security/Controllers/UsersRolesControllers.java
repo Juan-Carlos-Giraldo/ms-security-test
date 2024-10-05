@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/usersroles")
+@RequestMapping("api/usersroles")
 public class UsersRolesControllers {
     @Autowired
     UserRoleRepository theUserRoleRepository;

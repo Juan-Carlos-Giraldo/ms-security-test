@@ -7,24 +7,19 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
-
-
 @Setter
 @Getter
 @Data
 @Document
-public class Session {
+public class RolePermission {
     @Id
     private String _id;
-    private String token;
-    private Date expirationDate;
-    private String validationCode;
     @DBRef
-    private User user; // This is the user that is logged in
+    private Role role;
+    @DBRef
+    private Permission permission;
 
+    public RolePermission() {
 
-    public Session() {
     }
-
 }
