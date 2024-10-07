@@ -19,9 +19,10 @@ public class SecurityInterceptor implements HandlerInterceptor {
                             throws Exception {
         boolean succes = this.validatorService.validationRolePermission(request, request.getRequestURI(), request.getMethod());
 
+        System.out.println("Interceptor: " + request.getHeader("Authorization"));
         System.out.println("Interceptor: " + request.getRequestURI());
         System.out.println("Interceptor: " + request.getMethod());
-        System.out.println("Interceptor: " + succes);
+        System.out.println("Interceptor: " + succes); // Imprime en consola el resultado de la validación
 
         return succes; // Lógica a ejecutar antes de que se maneje la solicitud por el controlador
     }

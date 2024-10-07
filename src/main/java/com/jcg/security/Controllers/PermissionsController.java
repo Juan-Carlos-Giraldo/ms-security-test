@@ -10,7 +10,7 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/permissions")
+@RequestMapping("/api/public/permissions")
 public class PermissionsController {
     @Autowired
     private PermissionRepository thePermissionRepository;
@@ -18,6 +18,11 @@ public class PermissionsController {
     @GetMapping("")
     public List<Permission> findAll(){
         return this.thePermissionRepository.findAll();
+    }
+
+    @GetMapping("{url}/{method}")
+    public Permission findPermission(@PathVariable String url, @PathVariable String method){
+        return this.thePermissionRepository.getPermission(url, method);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -30,6 +35,21 @@ public class PermissionsController {
     @PostMapping("/all")
     public List<Permission> createAll(@RequestBody List<Permission> theNewPermissions){
         return this.thePermissionRepository.saveAll(theNewPermissions);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("{id}")
+    public Permission update(@PathVariable String id, @RequestBody Permission thePermission){
+        Permission thePermissionToUpdate = this.thePermissionRepository
+                .findById(id)
+                .orElse(null);
+        if (thePermissionToUpdate != null) {
+            thePermissionToUpdate.setUrl(thePermission.getUrl());
+            thePermissionToUpdate.setMethod(thePermission.getMethod());
+            return this.thePermissionRepository.save(thePermissionToUpdate);
+        } else {
+            return null;
+        }
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
